@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo Mines</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1b2129;;
+            color: white;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    z-index: 1000; /* Adicionado */
+}
+
+.notification {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 50px;
+    display: none;
+    z-index: 1001; /* Adicionado */
+}
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #323f50;
+            padding: 10px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .header .balance {
+            font-size: 20px;
+        }
+
+        .header .logout-button {
+            background-color: #615f5f85;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            cursor: pointer;
+            color: white;
+        }
+
+        .game-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .multipliers {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .multiplier-box {
+            width: 70px;
+            height: 70px;
+            background-color: #1b2129;
+            border: 2px solid #1b2129;
+            border-color: #555;
+            border-radius: 10px;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .multiplier-box.active {
+            background-color: #007bff;;
+        }
+
+        .multipliers .count {
+            font-size: 12px;
+            color: #ccc;
+        }
+
+        .mines-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 80px);
+            grid-gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .mine {
+            width: 80px;
+            height: 80px;
+            background-color: #145efc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10px;
+            cursor: not-allowed;
+            position: relative;
+            transition: background-color 0.3s, border 0.3s;
+        }
+
+        .mine img {
+            width: 40px;
+            height: 40px;
+            display: none;
+        }
+
+        .mine.active {
+            cursor: pointer;
+        }
+
+        .mine.clicked .diamond {
+            display: block;
+        }
+
+        .mine.clicked .bomb {
+            display: block;
+        }
+
+        .mine.black {
+            background-color: #000;
+            border: 2px solid #00ff00;
+        }
+
+        .mine.red {
+            background-color: #e74c3c;
+        }
+
+        .controls {
+            margin-bottom: 20px;
+        }
+
+
+        .controls input {
+            width: 150px;
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            margin: 5px;
+            text-align: center;
+        }
+
+        .controls button {
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: none;
+            background-color: #27ae60;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .controls button:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+
+        .controls button:hover:not(:disabled) {
+            background-color: #2ecc71;
+        }
+
+        .alert {
+            margin-top: 10px;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .withdraw-button {
+            background-color: #1abc9c;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+            color: white;
+            transition: background-color 0.3s;
+        }
+
+        .withdraw-button:hover {
+            background-color: #16a085;
+        }
+
+        .counters {
+    display: flex;
+    justify-content: center; /* Centraliza horizontalmente */
+    margin: 10px 0; /* Espaçamento acima e abaixo */
+}
+
+.counter {
+    width: 200px; /* Largura fixa para ambos os contêineres */
+    background-color: #1f2430;
+    border-width: 1px;
+    padding: 10px;
+    height: 50px;
+    border-radius: 5px;
+    border-color: azure;
+    color: #ccc;
+    text-align: center; /* Centraliza o texto */
+}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="balance" id="balance">Saldo: R$ 0,00</div>
+        <button class="logout-button" onclick="logout()">X</button>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+<div class="notification" id="notification">
+    <div id="notificationText"></div>
+    <div id="multiplierText"></div>
+    <div id="profitText"></div>
+</div>
+
+
+
+    
+
+        <div class="mines-grid" id="minesGrid">
+            <!-- Grid de 5x5 -->
+            <!-- As minas serão geradas via JavaScript -->
+        </div>
+
+        <div class="counters">
+            <div class="counter" id="bombCount">Bombas restantes: 3</div>
+            <div class="counter" id="diamondCount">Diamantes encontrados: 0</div>
+        </div>
+        
+
+        <div class="game-container">
+            <div class="multipliers">
+                <div class="multiplier-box" data-multiplier="1.07">
+                    <span>1.07x</span>
+                    <span class="count">1 Mine</span>
+                </div>
+                <div class="multiplier-box" data-multiplier="1.23">
+                    <span>1.23x</span>
+                    <span class="count">2 Mines</span>
+                </div>
+                <div class="multiplier-box" data-multiplier="1.41">
+                    <span>1.41x</span>
+                    <span class="count">3 Mines</span>
+                </div>
+                <div class="multiplier-box" data-multiplier="1.60">
+                    <span>1.60x</span>
+                    <span class="count">4 Mines</span>
+                </div>
+                <div class="multiplier-box" data-multiplier="1.90">
+                    <span>1.90x</span>
+                    <span class="count">5 Mines</span>
+                </div>
+                <div class="multiplier-box" data-multiplier="2.40">
+                    <span>2.40x</span>
+                    <span class="count">6 Mines</span>
+                </div>
+            </div>
+
+        <div class="controls">
+            <select id="bombCountSelect">
+                <option value="3">3 Bombas</option>
+                <option value="4">4 Bombas</option>
+                <option value="5">5 Bombas</option>
+                <option value="6">6 Bombas</option>
+                <option value="7">7 Bombas</option>
+                <option value="8">8 Bombas</option>
+                <option value="9">9 Bombas</option>
+                <option value="10">10 Bombas</option>
+                <option value="11">11 Bombas</option>
+                <option value="12">12 Bombas</option>
+                <option value="13">13 Bombas</option>
+                <option value="14">14 Bombas</option>
+                <option value="15">15 Bombas</option>
+                <option value="16">16 Bombas</option>
+                <option value="17">17 Bombas</option>
+                <option value="18">18 Bombas</option>
+                <option value="19">19 Bombas</option>
+                <option value="20">20 Bombas</option>
+                <option value="21">21 Bombas</option>
+                <option value="22">22 Bombas</option>
+                <option value="23">23 Bombas</option>
+                <option value="24">24 Bombas</option>
+            </select>
+            <input type="number" id="betAmount" placeholder="Valor da aposta" min="1">
+            <button id="betButton" onclick="startGame()">Apostar</button>
+        </div>
+
+        <button class="withdraw-button" onclick="withdraw()">Sacar</button>
+
+        <div class="alert" id="alert"></div>
+
+        
+    </div>
+
+    <script>
+        let balance = parseFloat(localStorage.getItem('balance')) || 0;
+        let gameActive = false;
+        let bombPositions = [];
+        let minesFound = 0;
+        let currentMultiplier = 1.07; // Exemplo de multiplicador
+        let profit = 0; // Lucro inicial
+        let clickedMines = new Set();
+
+        function updateBalanceDisplay() {
+            document.getElementById('balance').textContent = 'Saldo: R$ ' + balance.toFixed(2);
+        }
+
+        updateBalanceDisplay();
+
+        function showAlert(message) {
+            document.getElementById('alert').textContent = message;
+        }
+
+        function updateMultiplierDisplay() {
+    multipliers.forEach(multiplierBox => {
+        const multiplierValue = parseFloat(multiplierBox.dataset.multiplier);
+        if (multiplierValue === currentMultiplier) {
+            multiplierBox.classList.add('active');
+        } else {
+            multiplierBox.classList.remove('active');
+        }
+    });
+}
+
+        function showNotification(win, multiplier, profit) {
+    console.log("Notificação chamada:", win, multiplier, profit); // Debug
+    const overlay = document.getElementById('overlay');
+    const notification = document.getElementById('notification');
+    document.getElementById('notificationText').textContent = win ? 'WIN' : 'LOSER';
+    document.getElementById('multiplierText').textContent = win ? multiplier + 'x' : '';
+    overlay.style.display = 'block';
+    notification.style.display = 'block';
+
+    setTimeout(() => {
+        overlay.style.display = 'none';
+        notification.style.display = 'none';
+    }, 3000); // Aumentado para 5 segundos
+}
+        const minesGrid = document.getElementById('minesGrid');
+        const multipliers = document.querySelectorAll('.multiplier-box');
+
+        function setupMines() {
+            minesGrid.innerHTML = '';
+            for (let i = 0; i < 25; i++) {
+                const mine = document.createElement('div');
+                mine.classList.add('mine');
+                mine.innerHTML = `
+                    <img src="https://img.icons8.com/color/48/diamond.png" alt="Diamante" class="diamond">
+                    <img src="https://img.icons8.com/color/48/bomb.png" alt="Bomba" class="bomb">
+                `;
+                mine.addEventListener('click', () => selectMine(mine, i));
+                minesGrid.appendChild(mine);
+            }
+        }
+
+        setupMines();
+
+
+        function resetMines() {
+    const mines = document.querySelectorAll('.mine');
+    mines.forEach((mine, index) => {
+        mine.classList.remove('clicked', 'black', 'red');
+        mine.classList.add('active'); // Mantenha a mina ativa
+        mine.querySelector('.diamond').style.display = 'none';
+        mine.querySelector('.bomb').style.display = 'none';
+        mine.style.cursor = 'pointer'; // Permita clicar
+    });
+}
+
+function generateBombPositions(bombCount) {
+    const positions = new Set();
+
+    while (positions.size < bombCount) {
+        const randomIndex = Math.floor(Math.random() * 25);
+        positions.add(randomIndex);
+    }
+
+    return Array.from(positions);
+}
+
+function startGame() {
+    const betAmount = parseFloat(document.getElementById('betAmount').value);
+    const bombCount = parseInt(document.getElementById('bombCountSelect').value);
+
+    if (isNaN(betAmount) || betAmount <= 0) {
+        showAlert('Insira um valor de aposta válido.');
+        return;
+    }
+
+    if (betAmount > balance) {
+        showAlert('Saldo insuficiente.');
+        return;
+    }
+
+    balance -= betAmount;
+    updateBalanceDisplay();
+
+    bombPositions = generateBombPositions(bombCount);
+    minesFound = 0;
+    gameActive = true;
+    updateCounters();
+    resetMines();
+}
+
+// Atualize a condição do clique
+function selectMine(mine, index) {
+    if (!gameActive || !mine.classList.contains('active')) {
+        return; // Evite clicar se o jogo não está ativo ou a mina não está ativa
+    }
+
+    clickCount++;
+    mine.classList.add('clicked');
+
+    if (bombPositions.includes(index)) {
+        mine.classList.add('red');
+        mine.querySelector('.bomb').style.display = 'block';
+        showAlert('Você estourou uma bomba! Você perdeu tudo!');
+        revealAllMines(); // Revela todas as minas
+        gameActive = false; // Desative o jogo após estourar a bomba
+        updateBalanceDisplay();
+        showNotification(false);
+        return;
+    } else {
+        mine.classList.add('black');
+        mine.querySelector('.diamond').style.display = 'block';
+        minesFound++;
+        currentMultiplier = getMultiplier(minesFound); // Atualiza o multiplicador
+        updateMultiplierDisplay();
+        updateCounters();
+        showNotification(true, currentMultiplier, profit);
+    }
+}
+
+
+
+
+        let clickCount = 0; // Adiciona um contador de cliques
+
+        function selectMine(mine, index) {
+    if (!gameActive || !mine.classList.contains('active')) {
+        return;
+    }
+
+    clickCount++;
+    mine.classList.add('clicked');
+
+    if (bombPositions.includes(index)) {
+        mine.classList.add('red');
+        mine.querySelector('.bomb').style.display = 'block';
+        showAlert('Você estourou uma bomba! Você perdeu tudo!');
+        revealAllMines(); // Revela todas as minas
+        gameActive = false;
+        updateBalanceDisplay();
+        showNotification(false);
+        return;
+    } else {
+        mine.classList.add('black');
+        mine.querySelector('.diamond').style.display = 'block';
+        minesFound++;
+        currentMultiplier = getMultiplier(minesFound); // Atualiza o multiplicador
+        updateMultiplierDisplay();
+        updateCounters();
+        showNotification(true, currentMultiplier, profit);
+    }
+}
+
+function revealAllMines() {
+    const mines = document.querySelectorAll('.mine');
+    bombPositions.forEach(index => {
+        const mine = mines[index];
+        mine.querySelector('.bomb').style.display = 'block';
+        mine.classList.add('red');
+    });
+}
+
+function getMultiplier(count) {
+    const multipliersArray = [1.07, 1.23, 1.41, 1.60, 1.90, 2.40];
+    return multipliersArray[count - 1] || multipliersArray[multipliersArray.length - 1];
+}
+        function updateCounters() {
+  document.getElementById('bombCount').textContent = 'Bombas restantes: ' + (3 - minesFound);
+  document.getElementById('diamondCount').textContent = 'Diamantes encontrados: ' + minesFound;
+
+        }
+
+        function revealAllMines() {
+            const mines = document.querySelectorAll('.mine');
+            bombPositions.forEach(index => {
+                const mine = mines[index];
+                mine.querySelector('.bomb').style.display = 'block';
+                mine.classList.add('red');
+            });
+        }
+
+
+
+        function withdraw() {
+  if (balance > 0) {
+    localStorage.setItem('balance', balance);
+    showAlert('Saque de R$ ' + balance.toFixed(2) + ' realizado!');
+    balance = 0;
+    updateBalanceDisplay();
+  } else {
+    showAlert('Saldo insuficiente para saque.');
+  }
+}
+
+        function logout() {
+
+        }
+
+
+    </script>
+</body>
+</html>

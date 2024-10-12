@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma - Jogo Mines</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #1a1a2e;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .top-bar {
+            background-color: #2b3a4e;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 20px 40px;
+            width: 100%;
+        }
+
+        .account-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .balance {
+            color: white;
+            margin-right: 10px;
+        }
+
+        .wallet-button {
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .wallet-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        .profile-pic {
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+
+        .image-container {
+            background-color: #444;
+            width: 1100px;
+            height: 170px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px auto;
+            border-radius: 10px;
+        }
+
+        .slideshow-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .search-bar {
+            width: 90%;
+            max-width: 1080px;
+            margin: 20px auto;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #21213a;
+            border: none;
+            color: white;
+        }
+
+        .lobby {
+            align-self: flex-start;
+            margin: 10px 0;
+            color: white;
+            padding-left: 40px;
+            position: relative;
+        }
+
+        .container {
+            width: 150px;
+            height: 190px;
+            background-color: #333;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .container:hover {
+            background-color: #444;
+        }
+
+        .container h3 {
+            color: white;
+            margin: 0;
+        }
+
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #1b1d1f;
+            border-radius: 10px;
+            border-width: 0.5px;
+            border-style: solid;
+            border-color: #ff7300f6;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            z-index: 1000;
+            width: 400px;
+        }
+
+        .popup p {
+            color: white;
+        }
+
+        .popup h4 {
+            color: white
+        }
+
+        .popup h3 {
+            margin: 0 0 10px;
+            color: white;
+            text-align: center;
+        }
+
+        .popupPayment {
+    background-color: rgb(199, 199, 199);
+    color: black;
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 10px;
+    padding: 20px;
+    width: 400px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    z-index: 1100;
+}
+
+
+ .popupPayment h3 p {
+    color: black
+ }
+ 
+ .button.verify {
+    background-color: #38fa65; /* Verde */
+    color: white; /* Texto branco */
+    border-width: 1px;
+    border-color: white;
+
+    border-radius: 100px;
+    padding: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.button.verify:hover {
+    background-color: #218838; /* Verde escuro ao passar o mouse */
+}
+
+        .popup input {
+            width: 90%;
+            padding: 10px;
+            margin: 10px auto;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: transparent;
+            color: white;
+        }
+
+        .tab {
+            cursor: pointer;
+            color: white;
+            padding: 10px 20px;
+            margin: 0 5px;
+            transition: background-color 0.3s, transform 0.3s;
+            display: inline-block;
+        }
+
+        .tab.selected {
+            background-color: #007bff;
+            transform: scale(1.1);
+        }
+
+        .popup-content {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .notification {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #28a745; /* Verde */
+    color: white;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    transition: opacity 0.5s ease-in-out;
+    z-index: 1000;
+}
+
+        .button {
+            background-color: #000000;
+            color: white;
+            border-width: 1px;
+            border-radius: 100px;
+            border-color: #ff7300f6;
+            padding: 10px;
+            cursor: pointer;
+            width: 90%;
+            margin: 10px auto;
+            text-align: center;
+            transition: background-color 0.3s;
+        }
+
+        .button-JOGOS {
+    display: flex;
+    flex-wrap: wrap; /* Permite que os botões quebrem para a próxima linha */
+    justify-content: center; /* Centraliza os botões horizontalmente */
+    max-width: 1100px; /* Define uma largura máxima para a área dos botões */
+    margin: 20px auto; /* Centraliza a div */
+}
+
+.container {
+    width: 150px; /* Largura dos botões */
+    height: 190px;
+    background-color: #333;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    margin: 10px; /* Adiciona margem entre os botões */
+    transition: background-color 0.3s;
+}
+
+.button-JOGOS .container {
+    width: 150px; /* Largura do contêiner */
+    height: 200px; /* Altura do contêiner */
+    overflow: hidden; /* Oculta partes da imagem que saem do contêiner */
+    border: 1px solid #ccc; /* Borda do contêiner */
+    border-radius: 8px; /* Bordas arredondadas */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fff; /* Cor de fundo do contêiner */
+}
+
+.container img {
+    width: 100%; /* Garante que a largura da imagem seja 100% do contêiner */
+    height: auto; /* Mantém a proporção da imagem */
+    object-fit: cover; /* Cobre o contêiner sem distorção */
+}
+
+        .button:hover {
+            background-color: #272524f6;
+        }
+
+        .close-popup {
+            background-color: red;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="notification" id="notification"></div>
+
+    <div class="top-bar">
+        <div class="account-info">
+            <span class="balance" id="balance">R$ 0,00</span>
+            <button class="wallet-button" onclick="showRechargePopup()">
+                <img src="https://cdn-icons-png.flaticon.com/512/18/18677.png" alt="Carteira" class="wallet-icon">
+            </button>
+            <img src="https://cdn.iconscout.com/icon/free/png-256/free-businessman-icon-download-in-svg-png-gif-file-formats--entrepreneur-manager-accountant-administrator-avatars-flat-circle-pack-people-icons-1128970.png" alt="Perfil" class="profile-pic" onclick="logout()">
+        </div>
+    </div>
+
+    <div class="image-container">
+        <img src="https://winricher.com/img/footballBanner.a07ee290.jpg" alt="Imagem" class="slideshow-image">
+    </div>
+
+    <input type="text" class="search-bar" placeholder="Procurar">
+    
+    <div class="lobby">
+        <h2>Lobby</h2>
+    </div>
+
+    <div class="button-JOGOS">
+        <div class="container" onclick="showRechargePopup()">
+            <img src="https://winricher.com/game_logo/SELF/SE0002.jpg" alt="Imagem 1">
+        </div>
+        <div class="container"onclick="showRechargePopup()">
+            <img src="https://winricher.com/game_logo/SELF/SE0001.jpg" alt="Imagem 2">
+        </div>
+        <div class="container"onclick="showRechargePopup()">
+            <img src="https://winricher.com/game_logo/SELF/SE0004.jpg" alt="Imagem 3">
+        </div>
+        <div class="container"onclick="showRechargePopup()">
+            <img src="https://winricher.com/game_logo/SELF/SE0006.jpg" alt="Imagem 4">
+        </div>
+        <div class="container"onclick="showRechargePopup()">
+            <img src="https://winricher.com/game_logo/SELF/SE0008.jpg" alt="Imagem 5">
+        </div>
+        <div class="container"onclick="showRechargePopup()">
+            <img src="https://winricher.com/game_logo/SELF/SE0007.jpg" alt="Imagem 6">
+    </div>
+
+    <!-- Popups -->
+    <div class="popup" id="popupLogin">
+        <div class="popup-content">
+            <div class="tab selected" onclick="showLogin(this)">ENTRAR</div>
+            <div class="tab" onclick="showRegister(this)">INSCREVER-SE</div>
+        </div>
+        
+        <div id="popup-login-content">
+            <h3>Insira seu Email</h3>
+            <input type="text" placeholder="Insira seu email" id="email">
+            <input type="password" placeholder="Insira sua senha" id="password">
+            <button class="button" onclick="login()">ENTRAR</button>
+        </div>
+        <button class="button close-popup" onclick="togglePopup('popupLogin')">FECHAR</button>
+    </div>
+
+    <div class="popup" id="popupPayment">
+        <h3>Faça o depósito corretamente</h3>
+        <p>Chave-pix: 5f1fc7ce-e3a4-48cb-84fb-fbe806025fc5</p>
+        <p>Tipo de pix: chave aleatória</p>
+        <p id="selectedAmount"></p>
+        <p>Caso você faça o pagamento de uma quantia DIFERENTE menor ou maior do que a solicitada, nosso bot conseguirá verificar corretamente, e o saldo não será creditado na sua conta.</p>
+        <button class=" button verify" onclick="verificaaa()">verificar pagamento</button>
+        <button class="button close-popup" onclick="togglePopup('popupPayment')">FECHAR</button>
+    </div>
+
+    <div class="popup" id="popupRecharge">
+        <h3>Recarregar Saldo</h3>
+        <div>
+            <p>Selecione o valor:</p>
+            <button class="button" onclick="recharge(20)">R$20</button>
+            <button class="button" onclick="recharge(30)">R$30</button>
+            <button class="button" onclick="recharge(50)">R$50</button>
+            <button class="button" onclick="recharge(100)">R$100</button>
+        </div>
+        <div>
+            <h4>Apoiar Criador</h4>
+            <input type="text" id="creatorCode" placeholder="Digite o código do criador">
+            <button class="button" onclick="supportCreator()">Confirmar</button>
+        </div>
+        <button class="button close-popup" onclick="togglePopup('popupRecharge')">FECHAR</button>
+    </div>
+
+    <script>
+        // Estado do usuário
+        let isLoggedIn = JSON.parse(localStorage.getItem('isLoggedIn')) || false;
+        let balance = parseFloat(localStorage.getItem('balance')) || 0;
+
+        // Atualizar o saldo na interface
+        function updateBalanceDisplay() {
+            document.getElementById('balance').textContent = 'R$ ' + balance.toFixed(2);
+        }
+
+        updateBalanceDisplay();
+
+        function verifyLogin() {
+            if (!isLoggedIn) {
+                togglePopup('popupLogin');
+            } else {
+                redirectToMines();
+            }
+        }
+
+        function redirectToMines() {
+            window.location.href = 'mines.html';
+        }
+
+        function togglePopup(id) {
+    const popup = document.getElementById(id);
+    if (popup) {
+        popup.style.display = (popup.style.display === 'block') ? 'none' : 'block';
+    } else {
+        console.error(`Popup with ID ${id} not found`);
+    }
+}
+
+
+        function showLogin(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('selected'));
+            tab.classList.add('selected');
+            document.getElementById('popup-login-content').innerHTML = `
+                <h3>Insira seu Email</h3>
+                <input type="text" placeholder="Insira seu email" id="email">
+                <input type="password" placeholder="Insira sua senha" id="password">
+                <button class="button" onclick="login()">ENTRAR</button>
+            `;
+        }
+
+        function showRegister(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('selected'));
+            tab.classList.add('selected');
+            document.getElementById('popup-login-content').innerHTML = `
+                <h3>Insira seu Email para Registro</h3>
+                <input type="text" placeholder="Insira seu email" id="email">
+                <input type="password" placeholder="Crie uma senha" id="password">
+                <button class="button" onclick="register()">INSCREVER-SE</button>
+            `;
+        }
+
+        function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            // Lógica de login aqui (simulação)
+            if (email && password) {
+                isLoggedIn = true;
+                localStorage.setItem('isLoggedIn', true);
+                togglePopup('popupLogin');
+                updateBalanceDisplay();
+                alert('Login realizado com sucesso!');
+            } else {
+                alert('Por favor, insira email e senha.');
+            }
+        }
+
+        function verificaaa() {
+    // Aqui você pode implementar a lógica de verificação do pagamento
+    // Vamos simular um erro, sempre que essa função for chamada.
+
+    const notification = document.getElementById('notification');
+    notification.textContent = "Erro: Pagamento não verificado. Tente novamente."; // Mensagem de erro
+    notification.style.display = 'block'; // Mostra a notificação
+    notification.style.opacity = 1; // Torna a notificação visível
+
+    // Após 3 segundos, esconder a notificação
+    setTimeout(() => {
+        notification.style.opacity = 0; // Diminui a opacidade
+        setTimeout(() => {
+            notification.style.display = 'none'; // Esconde a notificação
+        }, 500); // Tempo para desaparecer
+    }, 3000); // Tempo que a notificação ficará visível
+}
+
+
+        function register() {
+            // Lógica de registro aqui
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            if (email && password) {
+                isLoggedIn = true;
+                balance = 0;
+                localStorage.setItem('isLoggedIn', true);
+                localStorage.setItem('balance', balance);
+                togglePopup('popupLogin');
+                updateBalanceDisplay();
+                alert('Registro realizado com sucesso!');
+            } else {
+                alert('Por favor, preencha todos os campos.');
+            }
+        }
+
+        function showRechargePopup() {
+            if (!isLoggedIn) {
+                togglePopup('popupLogin');
+            } else {
+                togglePopup('popupRecharge');
+            }
+        }
+
+        function recharge(amount) {
+    // Simular a adição de saldo ao saldo atual
+    localStorage.setItem('balance', balance); // Armazena o novo saldo no localStorage
+
+    updateBalanceDisplay(); // Atualiza o saldo exibido na tela
+    togglePopup('popupRecharge'); // Fecha o popup de recarga
+
+    // Abre o popup de pagamento, mostrando os detalhes do depósito
+    document.getElementById('popupPayment').style.display = 'block';
+    document.getElementById('selectedAmount').textContent = 'Valor selecionado: R$ ' + amount.toFixed(2);
+}
+
+
+
+        function supportCreator() {
+            const creatorCode = document.getElementById('creatorCode').value;
+            if (creatorCode.trim().toUpperCase() === 'HAMSTER') {
+                balance += 10;
+                localStorage.setItem('balance', balance);
+                updateBalanceDisplay();
+                alert('Você apoiou o criador e ganhou R$10,00!');
+                togglePopup('popupRecharge');
+            } else {
+                alert('Código de criador inválido.');
+            }
+        }
+    </script>
+</body>
+</html>
